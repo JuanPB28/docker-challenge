@@ -6,19 +6,15 @@ on:
       - 'v*'  # Dispara el flujo cuando se crea un tag que comience con "v"
 
 jobs:
-  build:
+  publish-images:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
-
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
       - name: Build image
         riun: docker build . -t juanpb/acceso-datos-docker:${{ env.VERSION }}
-
       - name: Push image to docker hub
         run: |
           docker push juanpb/acceso-datos-docker:${{ env.VERSION }}
