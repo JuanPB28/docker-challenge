@@ -8,3 +8,7 @@ Tengo un repositorio remoto en github con un fichero Dockerfile. Quiero que me m
 ```
 
 Realiza todos los pasos necesarios y genera una nueva versión en DockerHub. Ahora en tu máquina, ejecuta docker run -d -p 80:80 <usuario>/<imagen>:<version> para arancar un servicio web con todos los cambios que incluya la versión publicada.
+
+Pasos:
+    - Crear un repositorio en Docker hub
+    - Crear un archivo .yaml con el script de GitHub Actions
