@@ -15,3 +15,20 @@ ENV CI=true
 ENV PORT=3000
 
 CMD [ "npm", "run", "dev" ]
+
+# 2. For Nginx setup
+FROM nginx:1.26.2-alpine3.20
+
+# Copy config nginx
+COPY /.nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copy static assets from builder stage
+COPY /web/dist .
+
+# Containers run nginx with global directives and daemon off
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
