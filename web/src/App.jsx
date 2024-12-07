@@ -12,7 +12,7 @@ export default function App() {
   const [response, setResponse] = useState('')
 
   const handleApiCall = async (action) => {
-    const apiUrl = 'https://api.example.com' // Replace with your actual API URL
+    const apiUrl = 'http://127.0.0.1:8000/api' // Replace with your actual API URL
     let endpoint = ''
     let method = 'GET'
     let body = null
