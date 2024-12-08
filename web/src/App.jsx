@@ -3,7 +3,7 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-    const URI = 'http://172.10.0.10:8000'
+    const URI = 'http://localhost:8000'
     const [selectedStorage, setSelectedStorage] = useState(null);
     const [fileName, setFileName] = useState('');
     const [fileContent, setFileContent] = useState('');
