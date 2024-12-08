@@ -3,7 +3,7 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-    const URI = 'http://127.0.0.1:8000' // TODO: Cambiar a la que ponga en el docker-compose ya que no puedo poner una variable de entorno como en Node
+    const URI = 'http://172.10.0.10:8000'
     const [selectedStorage, setSelectedStorage] = useState(null);
     const [fileName, setFileName] = useState('');
     const [fileContent, setFileContent] = useState('');
