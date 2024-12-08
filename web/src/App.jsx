@@ -1,105 +1,128 @@
-import { useState } from 'react'
-import StorageTypeMenu from './components/StorageTypeMenu'
-import ActionButtons from './components/ActionButtons'
-import { Card } from './components/ui/card'
-import { Input } from './components/ui/input'
-import { Textarea } from './components/ui/textarea'
+import { useState } from 'react';
+import axios from 'axios';
+import './App.css';
 
-export default function App() {
-  const [storageType, setStorageType] = useState('class')
-  const [directoryName, setDirectoryName] = useState('')
-  const [content, setContent] = useState('')
-  const [response, setResponse] = useState('')
-
-  const handleApiCall = async (action) => {
-    const apiUrl = 'http://127.0.0.1:8000/api' // Replace with your actual API URL
-    let endpoint = ''
-    let method = 'GET'
-    let body = null
-
-    switch (storageType) {
-      case 'class':
-        endpoint = '/hello'
-        break
-      case 'json':
-        endpoint = '/json'
-        break
-      case 'csv':
-        endpoint = '/csv'
-        break
-    }
-
-    switch (action) {
-      case 'index':
-        method = 'GET'
-        break
-      case 'store':
-        method = 'POST'
-        body = JSON.stringify({ content })
-        break
-      case 'show':
-        method = 'GET'
-        endpoint += `/${directoryName}`
-        break
-      case 'update':
-        method = 'PUT'
-        endpoint += `/${directoryName}`
-        body = JSON.stringify({ content })
-        break
-      case 'destroy':
-        method = 'DELETE'
-        endpoint += `/${directoryName}`
-        break
-    }
-    
-    try {
-      const res = await fetch(`${apiUrl}${endpoint}`, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      })
-      const data = await res.json()
-      setResponse(JSON.stringify(data, null, 2))
-    } catch (error) {
-      setResponse(JSON.stringify({ error: 'An error occurred' }, null, 2))
-    }
-  }
-
-  return (
-    <div className="container mx-auto p-4 h-screen flex flex-col">
-      <h1 className="text-2xl font-bold mb-4">REST API Consumer</h1>
-      <div className="flex-grow grid grid-cols-3 gap-4">
-        <div>
-          <StorageTypeMenu 
-            selectedType={storageType} 
-            onSelectType={setStorageType} 
-          />
+function App() {
+    const URI = 'http://127.0.0.1:8000' // TODO: Cambiar a la que ponga en el docker-compose ya que no puedo poner una variable de entorno como en Node
+    const [selectedStorage, setSelectedStorage] = useState(null);
+    const [fileName, setFileName] = useState('');
+    const [fileContent, setFileContent] = useState('');
+    const [response, setResponse] = useState(null);
+    const handleStorageChange = (storageType) => {
+        setSelectedStorage(storageType);
+    };
+    const handleFileNameChange = (event) => {
+        setFileName(event.target.value);
+    };
+    const handleFileContentChange = (event) => {
+        setFileContent(event.target.value);
+    };
+    const handleGetFiles = async () => {
+        try {
+            const response = await axios.get(`${URI}/api/${selectedStorage}`);
+            setResponse(response.data);
+        } catch (error) {
+            console.error('Error fetching files:', error);
+            setResponse({ mensaje: 'Error' });
+        }
+    };
+    const handleStore = async () => {
+        try {
+            const response = await axios.post(`${URI}/api/${selectedStorage}`, {
+                filename: fileName,
+                content: fileContent,
+            });
+            setResponse(response.data);
+        } catch (error) {
+            console.error('Error storing file:', error);
+            setResponse({ mensaje: 'Error' });
+        }
+    };
+    const handleShow = async () => {
+        try {
+            const response = await axios.get(`${URI}/api/${selectedStorage}/${fileName}`);
+            setResponse(response.data);
+        } catch (error) {
+            console.error('Error fetching file:', error);
+            setResponse({ mensaje: 'Error' });
+        }
+    };
+    const handleUpdate = async () => {
+        try {
+            const response = await axios.put(`${URI}/api/${selectedStorage}/${fileName}`, {
+                content: fileContent,
+            });
+            setResponse(response.data);
+        } catch (error) {
+            console.error('Error updating file:', error);
+            setResponse({ mensaje: 'Error' });
+        }
+    };
+    const handleDelete = async () => {
+        try {
+            const response = await axios.delete(`${URI}/api/${selectedStorage}/${fileName}`);
+            setResponse(response.data);
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            setResponse({ mensaje: 'Error' });
+        }
+    };
+    return (
+        <div className="App">
+            <h1>Práctica 2</h1>
+            <div className="menu">
+                <button
+                    className={`menu-button ${selectedStorage === 'hello' ? 'active' : ''}`}
+                    onClick={() => handleStorageChange('hello')}
+                >
+                    Class Storage
+                </button>
+                <button
+                    className={`menu-button ${selectedStorage === 'json' ? 'active' : ''}`}
+                    onClick={() => handleStorageChange('json')}
+                >
+                    JSON
+                </button>
+                <button
+                    className={`menu-button ${selectedStorage === 'csv' ? 'active' : ''}`}
+                    onClick={() => handleStorageChange('csv')}
+                >
+                    CSV
+                </button>
+            </div>
+            <div className="input-container">
+                <div className="input-group">
+                    <input
+                        type="text"
+                        id="filename"
+                        placeholder="File"
+                        value={fileName}
+                        onChange={handleFileNameChange}
+                    />
+                </div>
+                <div className="input-group">
+                    <textarea
+                        id="content"
+                        placeholder="Content"
+                        value={fileContent}
+                        onChange={handleFileContentChange}
+                    />
+                </div>
+            </div>
+            <div className="button-group">
+                <button onClick={handleGetFiles}>Get Files</button>
+                <button onClick={handleStore}>Store</button>
+                <button onClick={handleShow}>Show</button>
+                <button onClick={handleUpdate}>Update</button>
+                <button onClick={handleDelete}>Delete</button>
+            </div>
+            <div className="response-card">
+                <label>Response:</label>
+                {response && (
+                    <pre className='response-content'>{JSON.stringify(response, null, 2)}</pre>
+                )}
+            </div>
         </div>
-        <div className="space-y-4">
-          <Input
-            placeholder="File"
-            value={directoryName}
-            onChange={(e) => setDirectoryName(e.target.value)}
-          />
-          <Textarea
-            placeholder="Content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={10}
-          />
-        </div>
-        <div>
-          <Card className="p-4 h-full overflow-auto">
-            <pre className="whitespace-pre-wrap">{response || 'Response'}</pre>
-          </Card>
-        </div>
-      </div>
-      <div className="mt-4 flex justify-center">
-        <ActionButtons onAction={handleApiCall} />
-      </div>
-    </div>
-  )
+    );
 }
-
+export default App;
